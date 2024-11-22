@@ -8,7 +8,6 @@ class JSModel:
         features = [f'feature_{n:02d}' for n in range(79)]
 
         self.today_cols = time_sin_cos + features
-        self.set_cols([], [])
 
     def reinit(self):
         pass
