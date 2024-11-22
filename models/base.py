@@ -1,8 +1,10 @@
+from abc import abstractmethod, ABC
+
 import polars as pl
 import numpy as np
 
 
-class JSModel:
+class JSModel(ABC):
     def __init__(self):
         time_sin_cos = ['time_sin', 'time_cos']
         features = [f'feature_{n:02d}' for n in range(79)]
@@ -37,3 +39,9 @@ class JSModel:
         predictions[:, 1] = 0
         predictions = pl.DataFrame(predictions, schema={'row_id': pl.Int64, 'responder_6': pl.Float32})
         return predictions
+
+    @abstractmethod
+    def save(self, name: str) -> None: pass
+
+    @abstractmethod
+    def load(self, name: str) -> None: pass
