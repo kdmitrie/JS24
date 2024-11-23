@@ -1,17 +1,34 @@
 import numpy as np
 import pickle
 import polars as pl
+import tensorflow as tf
 from .base import JSModel
 
 
 class JSModel_SimpleMLP(JSModel):
     replace_nan = 0
 
-    def __init__(self, tf_model, features_mean, features_std):
+    def __init__(self, tf_model=None, features_mean=None, features_std=None):
         super().__init__()
         self.tf_model = tf_model
         self.features_mean = features_mean
         self.features_std = features_std
+        if self.tf_model is None:
+            self.tf_model = tf.keras.models.Sequential([
+                tf.keras.Input(shape=(79,)),
+                # tf.keras.layers.BatchNormalization(epsilon=1e-05, momentum=0.1),
+
+                tf.keras.layers.Dropout(rate=0.1),
+                tf.keras.layers.Dense(units=512, use_bias=True, activation='silu'),
+                tf.keras.layers.BatchNormalization(epsilon=1e-05, momentum=0.1),
+
+                tf.keras.layers.Dropout(rate=0.1),
+                tf.keras.layers.Dense(units=512, use_bias=True, activation='silu'),
+                tf.keras.layers.BatchNormalization(epsilon=1e-05, momentum=0.1),
+
+                tf.keras.layers.Dense(units=1, use_bias=True, activation='tanh'),
+                tf.keras.layers.Dense(units=1, use_bias=False),
+            ])
 
     def set_cols(self, data_cols, lags_cols) -> None:
         super().set_cols(data_cols, lags_cols)
