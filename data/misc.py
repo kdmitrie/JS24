@@ -1,7 +1,8 @@
 import polars as pl
 from ..config.config import CFG
 
-def get_df_smb(selector=None, symbol_id=None):
+
+def get_df_smb(selector=None, features=None, symbol_id=None):
     df = pl.scan_parquet(CFG.path)
 
     if selector is not None:
@@ -10,7 +11,10 @@ def get_df_smb(selector=None, symbol_id=None):
     if symbol_id is not None:
         df = df.filter(pl.col('symbol_id') == symbol_id)
 
-    X = df.select(CFG.features).fill_null(strategy='forward').fill_null(0).collect().to_numpy()
+    if features is None:
+        features = CFG.features
+
+    X = df.select(features).fill_null(strategy='forward').fill_null(0).collect().to_numpy()
     y = df.select(CFG.target).collect().to_numpy()
     weight = df.select(CFG.weight).collect().to_numpy()
 
@@ -19,6 +23,7 @@ def get_df_smb(selector=None, symbol_id=None):
     test_X, test_y, test_weight = X[-split:], y[-split:], weight[-split:]
 
     return train_X, test_X
+
 
 def get_df_len():
     df = pl.scan_parquet(CFG.path)
